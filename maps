@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mi Página de Mapa</title>
+  <!-- Incluye los estilos CSS de Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    /* Estilos CSS para el mapa */
+    #map {
+      height: 500px;
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Estilos CSS para el cuadro de búsqueda de direcciones */
+    #search {
+      width: 100%;
+      max-width: 1000px;
+      margin: 10px auto;
+      padding: 10px;
+      background-color: #f8f8f8;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      font-size: 18px;
+      color: #333;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 8px;
+      border: none;
+      border-radius: 5px;
+      outline: none;
+      font-size: 16px;
+      color: #333;
+    }
+
+    button {
+      display: block;
+      width: 100%;
+      max-width: 200px;
+      margin-top: 10px;
+      padding: 8px;
+      background-color: #007bff;
+      color: #fff;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    /* Media query para hacer la página responsiva */
+    @media (min-width: 768px) {
+      #map {
+        width: 70%;
+        float: left;
+      }
+
+      #search {
+        width: 30%;
+        float: left;
+        margin-top: 0;
+        margin-left: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Contenedor del mapa -->
+  <div id="map"></div>
+
+  <!-- Cuadro de búsqueda de direcciones -->
+  <div id="search">
+    <h2>Buscar Dirección</h2>
+    <input type="text" id="addressInput" placeholder="Ingresa una dirección">
+    <button onclick="searchAddress()">Buscar</button>
+  </div>
+
+  <!-- Scripts JavaScript -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    // Función para inicializar el mapa
+    function initMap() {
+      // Coordenadas iniciales del mapa
+      var myLatLng = [4.30079, -74.80754];
+
+      // Crear mapa
+      var map = L.map('map').setView(myLatLng, 13);
+
+      // Añadir capa de mapa base de OpenStreetMap
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(map);
+
+      // Marcador en el mapa
+      var marker = L.marker(myLatLng).addTo(map)
+        .bindPopup('Mi Ubicación')
+        .openPopup();
+    }
+
+// Función para buscar una dirección en el mapa
+function searchAddress() {
+  var addressInput = document.getElementById('addressInput').value;
+  // Utiliza un servicio de geocodificación para convertir la dirección en coordenadas
+  // Puedes reemplazar la URL con la API de geocodificación que prefieras, como Google Maps Geocoding API o OpenStreetMap Nominatim
+  var geocodingUrl = 'https://nominatim.openstreetmap.org/search?format=json&q=' + addressInput;
+  fetch(geocodingUrl)
+    .then(response => response.json())
+    .then(data => {
+      if (data && data.length > 0) {
+        var lat = parseFloat(data[0].lat);
+        var lon = parseFloat(data[0].lon);
+        // Centra el mapa en las coordenadas de la dirección encontrada
+        map.setView([lat, lon], 15);
+        // Añade un marcador en las coordenadas de la dirección encontrada
+        L.marker([lat, lon]).addTo(map)
+          .bindPopup(addressInput)
+          .openPopup();
+      } else {
+        alert('Dirección no encontrada. Por favor, ingresa una dirección válida.');
+      }
+    })
+    .catch(error => {
+      console.error('Error al buscar dirección:', error);
+    });
+}
+  </script>
+  <!-- Ejecuta la función de inicialización del mapa al cargar la página -->
+  <script>
+    window.onload = function() {
+      initMap();
+    }
+  </script>
+</body>
+</html>
